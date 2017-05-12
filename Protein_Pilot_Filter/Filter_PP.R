@@ -1,7 +1,6 @@
 ######################################################################
 #FILTER_PP: 
 #This script create a xml file with filted data from Protein Pilot export 
-#IMPORTANT: CHANGE NAME OF THE FILE EACH TIME THAT YOU WANT TO USE IT. 
 ######################################################################
 
 

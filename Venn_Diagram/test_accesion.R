@@ -27,11 +27,30 @@ if(length(new.packages)) install.packages(new.packages)
 
 #Suppress warnings globally
 options(warn = -1)
-print("Ejecutando... Puede tardar un poco. ")
+cat("Ejecutando... Puede tardar un poco... \n\n")
 
 
 #Read files from directory. 
 files_glob <- (Sys.glob("*.xlsx")) 
+
+
+repeat{
+  cat("¿Quieres hacer la comparativa con algún control?\n ")
+  cat("1. Yes | 2. No\n")
+  x <- readLines(file("stdin"),1)#enter "yes"
+  if (x=="yes" | x==1 | x=="Yes")  {
+    break
+
+  }else if(x=="no" | x==2 | x=="No"){
+    break
+  }else{
+    cat("No han incluido nada\n")
+  }
+}
+
+
+
+
 
 if (length(files_glob) == 1){
   print("There is only 1 xlsx file")
