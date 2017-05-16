@@ -13,7 +13,7 @@
 
 ####################################################################################
 
-list.of.packages <- c("VennDiagram", "readxl","WriteXLS")
+list.of.packages <- c("VennDiagram", "readxl","WriteXLS", "dplyr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -23,7 +23,7 @@ if(length(new.packages)) install.packages(new.packages)
 # if (!require('readxl')) install.packages('readxl')
  library('readxl')
 # if (!require('WriteXLS')) install.packages('WriteXLS')
- library('WriteXLS')
+ library('WriteXLS'); library("dplyr")
 
 #Suppress warnings globally
 options(warn = -1)
@@ -40,12 +40,10 @@ repeat{
   cat("¿Quieres hacer la comparativa con algún control?\n ")
   cat("1. Yes | 2. No\n")
   x <- readLines(file("stdin"),1)#enter "yes"
+  x <- "yes"
   if (x=="yes" | x==1 | x=="Yes")  {
+    
     #Bucle if primero:
-    
-
-    
-    
     for(i in 1:length(files_glob_no_control)){
       
       df1 <- read_excel(file.path(getwd(), grep('Control', files_glob, value=TRUE)))
@@ -54,9 +52,39 @@ repeat{
       #Combine data frame using reduce function
       df_final <- Reduce(function(x, y) merge (x, y, by = c("Name", "Accession"), all = TRUE), list(df1, df2))
       
+      #Clasification. Se filtran los resultados
+     
+      test1 <- filter(df_final,  !is.na(df_final$`Peptides(95%).x` & df_final$`Peptides(95%).y`))
+      test1 <- with(test1,  test1[order(-test1$`Peptides(95%).x`) , ])
       
+      test2 <- filter(df_final,  !is.na(df_final$`Peptides(95%).x`) & is.na(df_final$`Peptides(95%).y`))
+      test2 <- with(test2,  test2[order(-test2$`Peptides(95%).x`) , ])
+      
+      test3 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) & !is.na(df_final$`Peptides(95%).y`))
+      test3 <- with(test3,  test3[order(-test3$`Peptides(95%).y`) , ])
+      
+      test_final<-rbind(test1, test2, test3)
+      
+      #Añadimos columna N 
+      test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
+      test_final2$N.x <- NULL; test_final2$N.y <- NULL
+      colnames(test_final2) <- c("N","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
+      
+      #Round: 
+      round_df <- function(df, digits) {
+        nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
+        
+        df[,nums] <- round(df[,nums], digits = digits)
+        
+        (df)
+      }
+      
+      test_final3 <- round_df(test_final2, digits=2)
+
+      
+
       #Export data frame to table.
-      WriteXLS(df_final, ExcelFileName = paste(gsub("\\.xlsx*","",files_glob_no_control[i]), "_Multiconsenso_Control.xlsx", sep = "", na=""), SheetNames = NULL, perl = "perl",
+      WriteXLS(test_final3, ExcelFileName = paste(gsub("\\.xlsx*","",files_glob_no_control[i]), "_Multiconsenso_Control.xlsx", sep = "", na=""), SheetNames = NULL, perl = "perl",
                verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
                row.names = FALSE, col.names = TRUE,
                AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
