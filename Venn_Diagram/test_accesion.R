@@ -27,6 +27,15 @@ files_glob <- (Sys.glob("*.xlsx"))
 control <- grep('Control', files_glob, value=TRUE)
 files_glob_no_control <- files_glob[files_glob != control]
 
+##########################################################Test. 
+
+
+files_glob_no_control2 <- files_glob[lapply(files_glob,function(x) length(grep("Control",x,value=FALSE))) == 0]
+
+
+
+
+
 
 #Check how many controls there are. 
 if(length(control)>1){
@@ -54,22 +63,33 @@ if(length(control)>1){
         df_final <- Reduce(function(x, y) merge (x, y, by = c("Name", "Accession"), all = TRUE), list(df1, df2))
         
         #Clasification. Se filtran los resultados
-       
+        #Filter with the same peptides
         test1 <- filter(df_final,  !is.na(df_final$`Peptides(95%).x` & df_final$`Peptides(95%).y`))
         test1 <- with(test1,  test1[order(-test1$`Peptides(95%).x`) , ])
-        
+        #Different peptides between 1º and the 2º. 
         test2 <- filter(df_final,  !is.na(df_final$`Peptides(95%).x`) & is.na(df_final$`Peptides(95%).y`))
         test2 <- with(test2,  test2[order(-test2$`Peptides(95%).x`) , ])
-        
+        #Different peptides between 2º and the 1º.
         test3 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) & !is.na(df_final$`Peptides(95%).y`))
         test3 <- with(test3,  test3[order(-test3$`Peptides(95%).y`) , ])
         
+        #Merge data. 
         test_final<-rbind(test1, test2, test3)
         
         #Añadimos columna N 
         test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
-        test_final2$N.x <- NULL; test_final2$N.y <- NULL
-        colnames(test_final2) <- c("N","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
+        test_final2$N.x <- NULL
+        test_final2$N.y <- NULL; 
+        
+        #Eliminales la columna X__1
+        if("X__1"%in% colnames(test_final2)){
+          test_final2 <- subset(test_final2, select = -c(X__1) )
+          colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
+          
+        }
+        
+        #Cambiamos nombres
+        colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
         
         #Round: 
         round_df <- function(df, digits) {
@@ -79,20 +99,18 @@ if(length(control)>1){
           
           (df)
         }
-        
+        #Round
         test_final3 <- round_df(test_final2, digits=2)
         
-        nam <- paste(files_glob[i], sep = "")
+        #
+        nam <- paste(files_glob_no_control[i], sep = "")
         dfList[[i]] = data.frame(test_final3)
         
-        names(dfList)<-sprintf(files_glob_no_control[i],1:length(dfList))
-        }
-  
-        
-  
+        names(dfList)<-sprintf(paste(gsub(".*","",files_glob_no_control[1:length(dfList)]), "Sumary_vs_Control",1:length(dfList), sep = "", na=""),1:length(dfList))
+      }
+
         #Export data frame to table.
-      x <- list(Proteins = data.frame(test_final3), Peptides = data.frame(Peptidos_PP6))
-      WriteXLS(x, paste(gsub("*?PeptideSummary.txt","",files_glob_peptides[i]), "Summary.xlsx", sep = "", na=""), names(x))
+      WriteXLS(dfList, ExcelFileName = "R.xlsx", names(dfList))
       
       
       
@@ -140,7 +158,7 @@ if(length(control)>1){
         
       } else if (length(files_glob_no_control) == 2){
         #Load excel file
-        
+
         df1 <- read_excel(file.path(getwd(), files_glob_no_control[1]))
         df2 <- read_excel(file.path(getwd(), files_glob_no_control[2]))
         
