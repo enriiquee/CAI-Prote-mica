@@ -139,8 +139,8 @@ if(length(control2)>1){
         print("There is only 1 xlsx file")
         
       } else if (length(files_glob_no_control) == 2){
+        
         #Load excel file
-
         df1 <- read_excel(file.path(getwd(), files_glob_no_control[1]))
         df2 <- read_excel(file.path(getwd(), files_glob_no_control[2]))
         
@@ -161,25 +161,25 @@ if(length(control2)>1){
         
         
         #Merge data. 
-
         Comunes2a2 <- test1
         Comunes1a1 <- rbind(test2,test3)
         
+        #Check variables that have comunes
         mylist_comunes <- mget(ls(pattern = "Comunes*"))
+        #Create a empty list
         dfList <- list()
         
         for(i in 1:length(mylist_comunes)){
-          
-          
-          #Añadimos columna N 
+                  
+          #Load dataframe in test_final
           test_final <- mylist_comunes[[i]]
 
-        #Añadimos columna N 
+          #Añadimos columna N 
           test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
           test_final2$N.x <- NULL
           test_final2$N.y <- NULL 
         
-        #Eliminales la columna X__1
+          #Eliminales la columna X__1
           if("X__1"%in% colnames(test_final2)){
             test_final2 <- subset(test_final2, select = -c(X__1) )
             colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
@@ -200,26 +200,32 @@ if(length(control2)>1){
         #Round
           test_final3 <- round_df(test_final2, digits=2)
           
-          
+          colnames(test_final3) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
+
           #Save in a list
-          dfList[[1]] = data.frame(test_final3)
+          dfList[[i]] = data.frame(test_final3)
           
-          names(dfList)<-sprintf(paste(gsub(".*","",mylist_comunes[1:length(dfList)]), "Sumary_vs_Control",1:length(dfList), sep = "", na=""),1:length(dfList))
           
+          
+          
+          names(dfList)<-sprintf(paste(gsub(".*","",mylist_comunes[1:length(dfList)]), "",names(mylist_comunes)[1:length(dfList)], sep = "", na=""),1:length(dfList))
+          
+        }
           
           #Export data frame to table.
-          WriteXLS(dfList, ExcelFileName = "Summaries_vs_Control.xlsx", names(dfList))
+          
+          WriteXLS(dfList, ExcelFileName = "Multiconsenso_2.xls", names(dfList))
         
 
         #Export data frame to table.
-        WriteXLS(test_final3, ExcelFileName = "Multiconsenso_2.xls", SheetNames = NULL, perl = "perl",
-                 verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
-                 row.names = FALSE, col.names = TRUE,
-                 AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
-                 na = "",
-                 FreezeRow = 0, FreezeCol = 0,
-                 envir = parent.frame())
-        
+        # WriteXLS(dfList, ExcelFileName = "Multiconsenso_2.xlsx", SheetNames = NULL, perl = "perl",
+        #          verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
+        #          row.names = FALSE, col.names = TRUE,
+        #          AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
+        #          na = "",
+        #          FreezeRow = 0, FreezeCol = 0,
+        #          envir = parent.frame())
+        # 
   
         #Create a Venn Diagram:
         #Dissable .log files
@@ -249,11 +255,23 @@ if(length(control2)>1){
         df1 <- read_excel(file.path(getwd(), files_glob_no_control[1]))
         df2 <- read_excel(file.path(getwd(), files_glob_no_control[2]))
         df3 <- read_excel(file.path(getwd(), files_glob_no_control[3]))
+        
+        #Remove X__1
+        if("X__1"%in% colnames(df1)){
+          df1 <- subset(df1, select = -c(X__1) )
+        } 
+        if("X__1"%in% colnames(df2)){
+          df2 <- subset(df2, select = -c(X__1) )
+        } 
+        if("X__1"%in% colnames(df3)){
+          df3 <- subset(df3, select = -c(X__1) )
+        }
+        
 
-        
-        
         #Combine data frame using reduce function
         df_final <- Reduce(function(x, y) merge (x, y, by = c("Name", "Accession"), all = TRUE), list(df1, df2, df3))
+        #colnames(df_final) <- c("Name","Accesion","N","Score","%Cov(95)","Peptides(95%)","Species","N.y","Score.y","%Cov(95).y","Peptides(95%).y","Species.y","N.z","Score.z","%Cov(95).z","Peptides(95%).z","Species.z")
+        
         
         #Clasification. Se filtran los resultados
         #Filter with the same peptides
@@ -279,25 +297,29 @@ if(length(control2)>1){
         test7 <- with(test7,  test7[order(-test7$`Peptides(95%)`) , ])
       
         
-        #Merge data. 
-        test_final<-rbind(test1, test2, test3, test4, test5, test6, test7)
+        #Lista de comunes
+        Comunes1a1 <- rbind(test5, test6,test7)
+        Comunes2a2 <- rbind(test2,test3,test4)
+        Comunes3a3 <- test1
+        
+        #Check variables that have comunes
+        mylist_comunes <- mget(ls(pattern = "Comunes*"))
+        #Create a empty list
+        dfList <- list()
+        
+        for(i in 1:length(mylist_comunes)){
+          
+          #Load dataframe in test_final
+          test_final <- mylist_comunes[[i]]
+          
+          #Añadimos columna N 
+          test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
+          test_final2$N.x <- NULL
+          test_final2$N.y <- NULL 
         
 
-        #Añadimos columna N 
-        test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
-        test_final2$N.x <- NULL
-        test_final2$N.y <- NULL 
-        test_final2$N.1 <- NULL
-        
-        #Eliminales la columna X__1
-        if("X__1"%in% colnames(test_final2)){
-          test_final2 <- subset(test_final2, select = -c(X__1) )
-          colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
-          
-        }
-        
         #Cambiamos nombres
-        colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
+        #colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
         
         #Round: 
         round_df <- function(df, digits) {
@@ -310,17 +332,16 @@ if(length(control2)>1){
         #Round
         test_final3 <- round_df(test_final2, digits=2)
         
+        #Save in a list
+        dfList[[i]] = data.frame(test_final3)
         
+        names(dfList)<-sprintf(paste(gsub(".*","",mylist_comunes[1:length(dfList)]), "",names(mylist_comunes)[1:length(dfList)], sep = "", na=""),1:length(dfList))
+        
+        }
         
         #Export data frame to table.
-        WriteXLS(test_final3, ExcelFileName = "Multiconsenso_3.xls", SheetNames = NULL, perl = "perl", 
-                 verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
-                 row.names = FALSE, col.names = TRUE,
-                 AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
-                 na = "",
-                 FreezeRow = 0, FreezeCol = 0,
-                 envir = parent.frame())
         
+        WriteXLS(dfList, ExcelFileName = "Multiconsenso_3.xlsx", names(dfList))
         
         #Function ven.diagram and grid.
         tiff( width=5, height=5, units="in",
@@ -347,100 +368,126 @@ if(length(control2)>1){
         df3 <- read_excel(file.path(getwd(), files_glob_no_control[3]))
         df4 <- read_excel(file.path(getwd(), files_glob_no_control[4]))
         
+        if("X__1"%in% colnames(df1)){
+          df1 <- subset(df1, select = -c(X__1) )
+        } 
+        if("X__1"%in% colnames(df2)){
+          df2 <- subset(df2, select = -c(X__1) )
+        } 
+        if("X__1"%in% colnames(df3)){
+          df3 <- subset(df3, select = -c(X__1) )
+        }
+        if("X__1"%in% colnames(df4)){
+          df4 <- subset(df4, select = -c(X__1) )
+        }
+        
 
         #Combine data frame using reduce function
-        df_final <- Reduce(function(x, y) merge (x, y, by = c("Name", "Accession"), all = TRUE), list(df1, df2, df3))
+        df_final <- Reduce(function(x, y) merge (x, y, by = c("Name", "Accession"), all = TRUE), list(df1, df2, df3, df4))
+        
+        colnames(df_final) <- c("Name","Accesion","N.x","Score.x","%Cov(95).x","Peptides(95%).x","Species.x", "N.y","Score.y","%Cov(95).y","Peptides(95%).y","Species.y","N.z","Score.z","%Cov(95).z","Peptides(95%).z","Species.z","N.w","Score.w","%Cov(95).w","Peptides(95%).w","Species.w")
+        
         
         #Clasification. Se filtran los resultados
-        #Filter with the same peptides
-        test1 <- filter(df_final,  !is.na(df_final$`Peptides(95%).x`) & !is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
+        #ALL
+        test1 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`))
         test1 <- with(test1,  test1[order(-test1$`Peptides(95%).x`) , ])
         #Different peptides between 1º and the 2º. 
-        test2 <- filter(df_final,  !is.na(df_final$`Peptides(95%).x`) & !is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%)`))
+        test2 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`))
         test2 <- with(test2,  test2[order(-test2$`Peptides(95%).x`) , ])
         #Different peptides between 2º and the 1º.
-        test3 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) & !is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test3 <- with(test3,  test3[order(-test3$`Peptides(95%).y`) , ])
+        test3 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`))
+        test3 <- with(test3,  test3[order(-test3$`Peptides(95%).x`) , ])
         #Different between 3º and 2º,1º
-        test4 <- filter(df_final,  !is.na(df_final$`Peptides(95%).x`) & is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test4 <- with(test4,  test4[order(-test4$`Peptides(95%)`) , ])
+        test4 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`))
+        test4 <- with(test4,  test4[order(-test4$`Peptides(95%).y`) , ])
         
-        test5 <- filter(df_final,  !is.na(df_final$`Peptides(95%).x`) & is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%)`))
-        test5 <- with(test5,  test5[order(-test5$`Peptides(95%).x`) , ])
+        test5 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`))        
+        test5 <- with(test5,  test5[order(-test5$`Peptides(95%).y`) , ])
         
-        test6 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) & !is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%)`))
-        test6 <- with(test6,  test6[order(-test6$`Peptides(95%).y`) , ])
+        test6 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`))        
+        test6 <- with(test6,  test6[order(-test6$`Peptides(95%).x`) , ])
         
-        test7 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test7 <- with(test7,  test7[order(-test7$`Peptides(95%)`) , ])
+        test7 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`))
+        test7 <- with(test7,  test7[order(-test7$`Peptides(95%).x`) , ])
         
-        test8 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test8 <- with(test8,  test8[order(-test8$`Peptides(95%)`) , ])
+        test8 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`))
+        test8 <- with(test8,  test8[order(-test8$`Peptides(95%).x`) , ])
         
-        test9 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test9 <- with(test9,  test9[order(-test9$`Peptides(95%)`) , ])
+        test9 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`))
+        test9 <- with(test9,  test9[order(-test9$`Peptides(95%).y`) , ])
         
-        test10 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test10 <- with(test10,  test10[order(-test10$`Peptides(95%)`) , ])
+        test10 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`))
+        test10 <- with(test10,  test10[order(-test10$`Peptides(95%).y`) , ])
         
-        test11 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test11 <- with(test11,  test11[order(-test11$`Peptides(95%)`) , ])
+        test11 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`))
+        test11 <- with(test11,  test11[order(-test11$`Peptides(95%).z`) , ])
         
-        test12 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test12 <- with(test12,  test12[order(-test12$`Peptides(95%)`) , ])
+        test12 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`))
+        test12 <- with(test12,  test12[order(-test12$`Peptides(95%).x`) , ])
         
-        test13 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test13 <- with(test13,  test13[order(-test13$`Peptides(95%)`) , ])
+        test13 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`))
+        test13 <- with(test13,  test13[order(-test13$`Peptides(95%).y`) , ])
         
-        test14 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test14 <- with(test14,  test14[order(-test14$`Peptides(95%)`) , ])
+        test14 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`))
+        test14 <- with(test14,  test14[order(-test14$`Peptides(95%).z`) , ])
         
-        test15 <- filter(df_final,  is.na(df_final$`Peptides(95%).x`) &  is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%)`))
-        test15 <- with(test15,  test15[order(-test15$`Peptides(95%)`) , ])
+        test15 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`))
+        test15 <- with(test15,  test15[order(-test15$`Peptides(95%).w`) , ])
         
         
         #Merge data. 
-        test_final<-rbind(test1, test2, test3, test4, test5, test6, test7)
+        Comunes_ALL<-rbind(test1, test2, test3, test4, test5, test6, test7, test8, test9, test10, test11, test12, test13, test14, test15)
+        
+        Comunes4a4 <- test1
+        Comunes3a3 <- rbind(test2,test3,test4,test5)
+        Comunes2a2 <- rbind(test6, test7, test8, test9, test10, test11)
+        Comunes1a1 <- rbind(test12, test13, test14, test15)
         
         
-        #Añadimos columna N 
-        test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
-        test_final2$N.x <- NULL
-        test_final2$N.y <- NULL 
-        test_final2$N.1 <- NULL
+        #Check variables that have comunes
+        mylist_comunes <- mget(ls(pattern = "Comunes*"))
+        #Create a empty list
+        dfList <- list()
         
-        #Eliminales la columna X__1
-        if("X__1"%in% colnames(test_final2)){
-          test_final2 <- subset(test_final2, select = -c(X__1) )
-          colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
+        for(i in 1:length(mylist_comunes)){
+          
+          #Load dataframe in test_final
+          test_final <- mylist_comunes[[i]]
+          
+          #Añadimos columna N 
+          test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
+          test_final2$N.x <- NULL
+          test_final2$N.y <- NULL 
+          test_final2$N.z <- NULL
+          test_final2$N.w <- NULL
+          
+          
+          
+          #Cambiamos nombres
+          #colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
+          
+          #Round: 
+          round_df <- function(df, digits) {
+            nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
+            
+            df[,nums] <- round(df[,nums], digits = digits)
+            
+            (df)
+          }
+          #Round
+          test_final3 <- round_df(test_final2, digits=2)
+          
+          #Save in a list
+          dfList[[i]] = data.frame(test_final3)
+          
+          names(dfList)<-sprintf(paste(gsub(".*","",mylist_comunes[1:length(dfList)]), "",names(mylist_comunes)[1:length(dfList)], sep = "", na=""),1:length(dfList))
           
         }
-        
-        #Cambiamos nombres
-        colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
-        
-        #Round: 
-        round_df <- function(df, digits) {
-          nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
-          
-          df[,nums] <- round(df[,nums], digits = digits)
-          
-          (df)
-        }
-        #Round
-        test_final3 <- round_df(test_final2, digits=2)
-        
-        
         
         #Export data frame to table.
-        WriteXLS(test_final3, ExcelFileName = "Multiconsenso_4.xls", SheetNames = NULL, perl = "perl", 
-                 verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
-                 row.names = FALSE, col.names = TRUE,
-                 AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
-                 na = "",
-                 FreezeRow = 0, FreezeCol = 0,
-                 envir = parent.frame())
         
+        WriteXLS(dfList, ExcelFileName = "Multiconsenso_4.xlsx", names(dfList))
         
         #Function ven.diagram and grid.
         tiff( width=5, height=5, units="in",
@@ -467,20 +514,131 @@ if(length(control2)>1){
         df2 <- read_excel(file.path(getwd(), files_glob_no_control[2]))
         df3 <- read_excel(file.path(getwd(), files_glob_no_control[3]))
         df4 <- read_excel(file.path(getwd(), files_glob_no_control[4]))
-        df5 <- read_excel(file.path(getwd(), files_glob_no_control[4]))
+        df5 <- read_excel(file.path(getwd(), files_glob_no_control[5]))
         
-
+        if("X__1"%in% colnames(df1)){
+          df1 <- subset(df1, select = -c(X__1) )
+        } 
+        if("X__1"%in% colnames(df2)){
+          df2 <- subset(df2, select = -c(X__1) )
+        } 
+        if("X__1"%in% colnames(df3)){
+          df3 <- subset(df3, select = -c(X__1) )
+        }
+        if("X__1"%in% colnames(df4)){
+          df4 <- subset(df4, select = -c(X__1) )
+        }
+        if("X__1"%in% colnames(df5)){
+          df5 <- subset(df5, select = -c(X__1) )
+        }
+        
+        
         #Combine data frame using reduce function
         df_final <- Reduce(function(x, y) merge (x, y, by = c("Name", "Accession"), all = TRUE), list(df1, df2, df3, df4, df5))
         
+        colnames(df_final) <- c("Name","Accesion","N.x","Score.x","%Cov(95).x","Peptides(95%).x","Species.x", "N.y","Score.y","%Cov(95).y","Peptides(95%).y","Species.y","N.z","Score.z","%Cov(95).z","Peptides(95%).z","Species.z","N.w","Score.w","%Cov(95).w","Peptides(95%).w","Species.w", "N.r","Score.r","%Cov(95).r","Peptides(95%).r","Species.r")
+        
+        
+        #Clasification. Se filtran los resultados
+        #ALL
+        test1 <- filter(df_final, !is.na(df_final$`Peptides(95%).x`)& !is.na(df_final$`Peptides(95%).y`)& !is.na(df_final$`Peptides(95%).z`)& !is.na(df_final$`Peptides(95%).w`, & !is.na(df_final$`Peptides(95%).r`))
+        test1 <- with(test1,  test1[order(-test1$`Peptides(95%).x`) , ])
+        #Different peptides between 1º and the 2º. 
+        test2 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`))
+        test2 <- with(test2,  test2[order(-test2$`Peptides(95%).x`) , ])
+        #Different peptides between 2º and the 1º.
+        test3 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`))
+        test3 <- with(test3,  test3[order(-test3$`Peptides(95%).x`) , ])
+        #Different between 3º and 2º,1º
+        test4 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`))
+        test4 <- with(test4,  test4[order(-test4$`Peptides(95%).y`) , ])
+        
+        test5 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+        test5 <- with(test5,  test5[order(-test5$`Peptides(95%).y`) , ])
+        
+        test6 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+        test6 <- with(test6,  test6[order(-test6$`Peptides(95%).x`) , ])
+        
+        test7 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+        test7 <- with(test7,  test7[order(-test7$`Peptides(95%).x`) , ])
+        
+        test8 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+        test8 <- with(test8,  test8[order(-test8$`Peptides(95%).x`) , ])
+        
+        test9 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+        test9 <- with(test9,  test9[order(-test9$`Peptides(95%).y`) , ])
+        
+        test10 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+        test10 <- with(test10,  test10[order(-test10$`Peptides(95%).y`) , ])
+        
+        test11 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+        test11 <- with(test11,  test11[order(-test11$`Peptides(95%).z`) , ])
+        
+        test12 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+       test12 <- with(test12,  test12[order(-test12$`Peptides(95%).x`) , ])
+        
+        test13 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+       test13 <- with(test13,  test13[order(-test13$`Peptides(95%).y`) , ])
+        
+        test14 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+       test14 <- with(test14,  test14[order(-test14$`Peptides(95%).z`) , ])
+        
+        test15 <- filter(df_final, is.na(df_final$`Peptides(95%).x`)& is.na(df_final$`Peptides(95%).y`)& is.na(df_final$`Peptides(95%).z`)& is.na(df_final$`Peptides(95%).w`, & is.na(df_final$`Peptides(95%).r`)
+       test15 <- with(test15,  test15[order(-test15$`Peptides(95%).w`) , ])
+        
+        
+        #Merge data. 
+        Comunes_ALL<-rbind(test1, test2, test3, test4, test5, test6, test7, test8, test9, test10, test11, test12, test13, test14, test15)
+        
+        Comunes4a4 <- test1
+        Comunes3a3 <- rbind(test2,test3,test4,test5)
+        Comunes2a2 <- rbind(test6, test7, test8, test9, test10, test11)
+        Comunes1a1 <- rbind(test12, test13, test14, test15)
+        
+        
+        #Check variables that have comunes
+        mylist_comunes <- mget(ls(pattern = "Comunes*"))
+        #Create a empty list
+        dfList <- list()
+        
+        for(i in 1:length(mylist_comunes)){
+          
+          #Load dataframe in test_final
+          test_final <- mylist_comunes[[i]]
+          
+          #Añadimos columna N 
+          test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
+          test_final2$N.x <- NULL
+          test_final2$N.y <- NULL 
+          test_final2$N.z <- NULL
+          test_final2$N.w <- NULL
+          
+          
+          
+          #Cambiamos nombres
+          #colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
+          
+          #Round: 
+          round_df <- function(df, digits) {
+            nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
+            
+            df[,nums] <- round(df[,nums], digits = digits)
+            
+            (df)
+          }
+          #Round
+          test_final3 <- round_df(test_final2, digits=2)
+          
+          #Save in a list
+          dfList[[i]] = data.frame(test_final3)
+          
+          names(dfList)<-sprintf(paste(gsub(".*","",mylist_comunes[1:length(dfList)]), "",names(mylist_comunes)[1:length(dfList)], sep = "", na=""),1:length(dfList))
+          
+        }
+        
         #Export data frame to table.
-        WriteXLS(df_final, ExcelFileName = "Multiconsenso_5.xls", SheetNames = NULL, perl = "perl",
-                 verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
-                 row.names = FALSE, col.names = TRUE,
-                 AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
-                 na = "",
-                 FreezeRow = 0, FreezeCol = 0,
-                 envir = parent.frame())
+        
+        WriteXLS(dfList, ExcelFileName = "Multiconsenso_4.xlsx", names(dfList))
         
         #Create a Venn Diagram: 
         #Dissable .log files
