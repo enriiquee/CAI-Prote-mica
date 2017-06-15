@@ -44,12 +44,6 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     Peptidos_PP <- read_delim(files_glob_peptides[i],
                               "\t", escape_double = FALSE, trim_ws = TRUE)
     
-    Peptidos_PP <- read_delim("Y:/ENRIQUE/Programas/Protein_Pilot_Filter/17-33_16-YS-PS_SPAll_PeptideSummary.txt", 
-                                   "\t", escape_double = FALSE, trim_ws = TRUE)
-    
-    Proteins_PP <- read_delim("Y:/ENRIQUE/Programas/Protein_Pilot_Filter/17-33_16-YS-PS_SPAll_ProteinSummary.txt", 
-                                   "\t", escape_double = FALSE, trim_ws = TRUE)
-    
     #choose the columns that we want. 
     Proteins_PP2 <- data.frame(Proteins_PP$N,Proteins_PP$Unused,Proteins_PP$`%Cov(95)`,Proteins_PP$`Peptides(95%)`,Proteins_PP$Accession,Proteins_PP$Name,Proteins_PP$Species)
     Peptidos_PP2 <- data.frame(Peptidos_PP$N,Peptidos_PP$Unused,Peptidos_PP$`%Cov(95)`,Peptidos_PP$Accessions,Peptidos_PP$Names,Peptidos_PP$Contrib,Peptidos_PP$Conf,Peptidos_PP$Sequence,Peptidos_PP$Modifications,Peptidos_PP$Cleavages,Peptidos_PP$dMass,Peptidos_PP$`Prec MW`,Peptidos_PP$`Prec m/z`,Peptidos_PP$`Theor MW`,Peptidos_PP$`Theor m/z`,Peptidos_PP$`Theor z`,Peptidos_PP$Sc,Peptidos_PP$Spectrum,Peptidos_PP$Time)
