@@ -21,12 +21,12 @@ files_glob_proteins <- (Sys.glob("*_ProteinSummary.txt"))
 
 
 if (length(files_glob_peptides) != length(files_glob_proteins)) {
-  print("¡¡WARNING!! Different number of files: Protein and Peptides")
+  print("??WARNING!! Different number of files: Protein and Peptides")
 } else {
   i <- 1
   while(i <= length(files_glob_peptides)){
     
-    
+
     #Suppress warnings globally
     options(warn = -1)
     print("Ejecutando... Puede tardar un poco. ")
@@ -61,7 +61,7 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP..Peptides.95... > 0)
     
     
-    #Proteinas
+    #Filter peptide and filters
     Peptidos_PP4 <- subset(Peptidos_PP3, Peptidos_PP3$Peptidos_PP.Unused > 1.3)
     Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Contrib > 0) 
     Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Conf > 95) 
@@ -106,9 +106,18 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     
     Proteins_PP6$Species <- gsub('\\d+\\.?','', Proteins_PP6$Species)
 
-
+    #Compare and create a new column with element assigned by comparation with N peptide table. 
+    
     Peptidos_PP6 <- Peptidos_PP5[order(Peptidos_PP5[,1],-Peptidos_PP5[,6]),]
     Peptidos_PP6$Accessions <- gsub("\\;.*","", Peptidos_PP6$Accessions)
+    
+    for (i in 1:length(Peptidos_PP6$Accessions)) {
+      #print(match(prueba1_2$Peptidos_PP6.Accessions[i], prueba1$Proteins_PP6.Accession, nomatch=NA))
+      Peptidos_PP6$N[i] <- match(Peptidos_PP6$Accessions[i],Proteins_PP6$Accession, nomatch=NA)
+      
+    } 
+    
+    Peptidos_PP6 <- Peptidos_PP6[order(Peptidos_PP6[,1],-Peptidos_PP6[,6]),]
     
     #Export xml
     # WriteXLS(Proteins_PP6, ExcelFileName = "Proteins_summary.xls", SheetNames = NULL, perl = "perl",
@@ -150,3 +159,6 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     i <- i + 1
   }
 }
+
+
+
