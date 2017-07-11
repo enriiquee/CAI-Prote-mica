@@ -303,6 +303,7 @@ repeat{
         test_final2 <- data.frame(cbind(N = 1:nrow(test_final), test_final))
         test_final2$N.x <- NULL
         test_final2$N.y <- NULL 
+        test_final2$N.1 <- NULL
 
         #Cambiamos nombres
         #colnames(test_final2) <- c("N","Name","Accesion","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species","Score","%Cov(95)","Peptides(95%)","Species")
@@ -642,6 +643,7 @@ repeat{
         test_final2$N.y <- NULL 
         test_final2$N.z <- NULL
         test_final2$N.w <- NULL
+        test_final2$N.u <- NULL
 
 
 
