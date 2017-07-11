@@ -94,10 +94,26 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     #Protein accesion sorted
     duplicate4 <- with(Proteins_PP5,  Proteins_PP5[order(Proteins_PP5$Accession) , ])
     #Replace in protein table
+    
+    #If we need to remove specific protein from Proteins file you can use this. 
+    #duplicate4 <- duplicate4[ ! ( ( duplicate4$N ==192)) , ] 
+    
+    #In order to remove this duplicates, we use if lenght to compare. Then we create 
+    #a new table with the reverse elements in peptides, remove letters after ; and duplicates
+    # 
+    
+    if (length(duplicate4$`Peptides(95%)`)!= length(duplicate3$numdup)){
+      tabla_reversed <- data.frame(Peptidos_PP2[grepl("REVERSED", Peptidos_PP2$Peptidos_PP.Names),])
+      tabla_reversed$Peptidos_PP.Accessions <- gsub("\\;.*","", tabla_reversed$Peptidos_PP.Accessions)
+      tabla_reversed <- unique(tabla_reversed$Peptidos_PP.Accessions)
+      
+      #Remove element from the list
+      duplicate4 <- duplicate4[ ! duplicate4$Accession %in% tabla_reversed, ]
+      
+    }
+    
     duplicate4$`Peptides(95%)` <- duplicate3$numdup
     duplicate4$Accession <- gsub("\\;.*","", duplicate4$Accession)
-    
-    
     
     
     #Sort columns by peptides
