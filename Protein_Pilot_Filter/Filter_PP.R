@@ -102,14 +102,40 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     #a new table with the reverse elements in peptides, remove letters after ; and duplicates
     # 
     
-    if (length(duplicate4$`Peptides(95%)`)!= length(duplicate3$numdup)){
-      tabla_reversed <- data.frame(Peptidos_PP2[grepl("REVERSED", Peptidos_PP2$Peptidos_PP.Names),])
-      tabla_reversed$Peptidos_PP.Accessions <- gsub("\\;.*","", tabla_reversed$Peptidos_PP.Accessions)
-      tabla_reversed <- unique(tabla_reversed$Peptidos_PP.Accessions)
-      
-      #Remove element from the list
-      duplicate4 <- duplicate4[ ! duplicate4$Accession %in% tabla_reversed, ]
-      
+    # if (length(duplicate4$`Peptides(95%)`)!= length(duplicate3$numdup)){
+    #   tabla_reversed <- data.frame(Peptidos_PP2[grepl("REVERSED", Peptidos_PP2$Peptidos_PP.Names),])
+    #   tabla_reversed$Peptidos_PP.Accessions <- gsub("\\;.*","", tabla_reversed$Peptidos_PP.Accessions)
+    #   tabla_reversed <- unique(tabla_reversed$Peptidos_PP.Accessions)
+    #   
+    #   #Remove element from the list
+    #   duplicate4 <- duplicate4[ ! duplicate4$Accession %in% tabla_reversed, ]
+    #   
+    # }
+    
+    #If we want to have the same number of proteins and peptides, we've to remove those who are in proteins but 
+    #not in peptides, for that reason we are going to create two new tables. 
+    
+    #We take the data that we want and remove everthing that is after the first ";".  
+    df1 <- data.frame("Accesion"=gsub("\\;.*","", duplicate4$Accession), stringsAsFactors = FALSE)
+    df2 <- data.frame("Accesion2"=gsub("\\;.*","", duplicate3$Peptidos_PP5.Accession), stringsAsFactors = FALSE)
+    
+    #Create a list
+    lst <- list(df1, df2)
+    
+    #Create a list where we can test similars
+    alltests <- unique(trimws(unlist(lst, recursive = TRUE)))
+    df_final <- as.data.frame(
+      setNames(lapply(lst, function(a) alltests[ match(alltests, a[,1]) ]),
+               sapply(lst, names)),
+      stringsAsFactors = FALSE
+    )
+    #Create a data frame with only element of the column that have
+    df_final_NA <- df_final[is.na(df_final$Accesion2),][1]
+    
+
+    for (i in df_final_NA$Accesion){
+      #print(i)
+      duplicate4 <- duplicate4[!grepl(as.character(i), duplicate4$Accession),]
     }
     
     duplicate4$`Peptides(95%)` <- duplicate3$numdup
