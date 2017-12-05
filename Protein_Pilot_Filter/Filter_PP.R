@@ -4,11 +4,11 @@
 ######################################################################
 
 
-list.of.packages <- c("readr", "readxl","WriteXLS")
+list.of.packages <- c("readr", "readxl","WriteXLS", "openxlsx")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
-library('readr'); library('readxl'); library('WriteXLS')
+library('readr'); library('readxl'); library('WriteXLS'); library("openxlsx")
 
 #Suppress warnings globally
 options(warn = -1)
@@ -134,8 +134,8 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     
 
     for (i in df_final_NA$Accesion){
-      #print(i)
-      duplicate4 <- duplicate4[!grepl(as.character(i), duplicate4$Accession),]
+      print(i)
+      duplicate4 <- duplicate4[!duplicate4$Accession == as.character(i), ]
     }
     
     duplicate4$`Peptides(95%)` <- duplicate3$numdup
@@ -195,12 +195,12 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     
   
     x <- list(Proteins = data.frame(Proteins_PP6), Peptides = data.frame(Peptidos_PP6))
-    WriteXLS(x, paste(gsub("*?PeptideSummary.txt","",files_glob_peptides[i]), "Summary.xlsx", sep = "", na=""), names(x))
+    #WriteXLS(x, paste(gsub("*?PeptideSummary.txt","",files_glob_peptides[i]), "Summary.xlsx", sep = "", na=""), names(x))
+    write.xlsx(x, file = paste(gsub("*?PeptideSummary.txt","",files_glob_peptides[i]), "Summary.xlsx", sep = "", na=""))
+    
     
 
     i <- i + 1
   }
 }
-
-
 

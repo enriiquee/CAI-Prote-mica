@@ -433,9 +433,11 @@ repeat{
 
       #Check variables that have comunes
       mylist_comunes <- mget(ls(pattern = "Comunes*"))
+      #Remove data frames that are empty
+      mylist_comunes <-mylist_comunes[sapply(mylist_comunes, function(x) dim(x)[1]) > 0]
+      
       #Create a empty list
       dfList <- list()
-
       for(i in 1:length(mylist_comunes)){
         #Load dataframe in test_final
         test_final <- mylist_comunes[[i]]

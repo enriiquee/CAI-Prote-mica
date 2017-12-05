@@ -1,6 +1,0 @@
-#Generar Van Diagram. 
-
-1. Copiar y pegar en el mismo directorio los excels que se quieran comprobar. 
-2. La extensión de esos excels debe ser .xlsx
-3. La estructura de las columnas debe ser igual que la de la carpeta Ejemplos. 
-4. En caso de error (Cosa poco probable) contactar con Enrique (enrique.perez@ucm.es)
