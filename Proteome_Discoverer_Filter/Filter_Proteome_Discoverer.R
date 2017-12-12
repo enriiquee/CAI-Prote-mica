@@ -46,45 +46,49 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
                               "\t", escape_double = FALSE, trim_ws = TRUE, col_types = cols())
     
     
-    Peptidos_PP2 <- data.frame("Master Protein Accesions"=Peptidos_PP$`Master Protein Accessions`, Sequence=Peptidos_PP$Sequence, Modifications=Peptidos_PP$Modifications, "#Protein Groups"=Peptidos_PP$)
+    Peptidos_PP2 <- data.frame("Master Protein Accesions"=Peptidos_PP$`Master Protein Accessions`, Sequence=Peptidos_PP$Sequence, Modifications=Peptidos_PP$Modifications, "Protein Groups"=subset(Peptidos_PP, select = c(5)), Proteins=subset(Peptidos_PP, select = c(6)),"PSMs"=subset(Peptidos_PP, select = c(7)), "Missed Clavages"=subset(Peptidos_PP, select = c(9)), "Theo.MH+[Da]"=Peptidos_PP$`Theo. MH+ [Da]` )
+    
     #choose the columns that we want. 
-    Proteins_PP2 <- data.frame(Proteins_PP$N,Proteins_PP$Unused,Proteins_PP$`%Cov(95)`,Proteins_PP$`Peptides(95%)`,Proteins_PP$Accession,Proteins_PP$Name,Proteins_PP$Species)
-    Peptidos_PP2 <- data.frame(Peptidos_PP$N,Peptidos_PP$Unused,Peptidos_PP$`%Cov(95)`,Peptidos_PP$Accessions,Peptidos_PP$Names,Peptidos_PP$Contrib,Peptidos_PP$Conf,Peptidos_PP$Sequence,Peptidos_PP$Modifications,Peptidos_PP$Cleavages,Peptidos_PP$dMass,Peptidos_PP$`Prec MW`,Peptidos_PP$`Prec m/z`,Peptidos_PP$`Theor MW`,Peptidos_PP$`Theor m/z`,Peptidos_PP$`Theor z`,Peptidos_PP$Sc,Peptidos_PP$Spectrum,Peptidos_PP$Time)
+    Proteins_PP2 <- subset( Proteins_PP, select = -c(1,2))
+
+    Peptidos_PP2 <- subset( Peptidos_PP, select = -c(1,2,8))
+    Peptidos_PP2 <- data.frame("Master Protein Accesion"=Peptidos_PP$`Master Protein Accessions`, Peptidos_PP2)
     
     #Remove rows with REVERSED as string
-    Proteins_PP3 <- Proteins_PP2[!grepl("REVERSED", Proteins_PP2$Proteins_PP.Name),]
+    ###### Añadir aqui nuevo código para que te quite las Low en ambos lados. 
+    Proteins_PP3 <- Proteins_PP2[!grepl("Low", Proteins_PP2$Proteins_PP.Name),]
     Peptidos_PP3 <- Peptidos_PP2[!grepl("REVERSED", Peptidos_PP2$Peptidos_PP.Names),]
     
     #Proteins_PP2[- grep("^REVERSED ", Proteins_PP2$Name),]
     #Proteins_PP2[ grep("REVERSED ", Proteins_PP2$Name, invert = TRUE) , ]
     
-    #Remove rows with Unised value => 1,3
-    Proteins_PP4 <- subset(Proteins_PP3, Proteins_PP3$Proteins_PP.Unused > 1.3 ) 
-    Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP...Cov.95.. > 0) 
-    Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP..Peptides.95... > 0)
-    
-    
-    #Filter peptide and filters
-    Peptidos_PP4 <- subset(Peptidos_PP3, Peptidos_PP3$Peptidos_PP.Unused > 1.3)
-    Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Contrib > 0) 
-    Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Conf > 95) 
-    Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP...Cov.95.. > 0) 
-    
-    #Round numbers
-    colnames(Proteins_PP4) <- c("N", "Unused", "%Cov(95)", "Peptides(95%)", "Accession","Name","Species")
-    colnames(Peptidos_PP4) <- c("N","Unused",	"%Cov(95)",	"Accessions",	"Names",	"Contrib",	"Conf",	"Sequence",	"Modifications",	"Cleavages",	"dMass",	"Prec MW",	"Prec m/z",	"Theor MW",	"Theor m/z",	"Theor z",	"Sc",	"Spectrum",	"Time")
-    
-    round_df <- function(df, digits) {
-      nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
-      
-      df[,nums] <- round(df[,nums], digits = digits)
-      
-      (df)
-    }
-    
-    Proteins_PP5 <- round_df(Proteins_PP4, digits=2)
-    Peptidos_PP5 <- round_df(Peptidos_PP4, digits=2)
-    
+    # #Remove rows with Unised value => 1,3
+    # Proteins_PP4 <- subset(Proteins_PP3, Proteins_PP3$Proteins_PP.Unused > 1.3 ) 
+    # Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP...Cov.95.. > 0) 
+    # Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP..Peptides.95... > 0)
+    # 
+    # 
+    # #Filter peptide and filters
+    # Peptidos_PP4 <- subset(Peptidos_PP3, Peptidos_PP3$Peptidos_PP.Unused > 1.3)
+    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Contrib > 0) 
+    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Conf > 95) 
+    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP...Cov.95.. > 0) 
+    # 
+    # #Round numbers
+    # colnames(Proteins_PP4) <- c("N", "Unused", "%Cov(95)", "Peptides(95%)", "Accession","Name","Species")
+    # colnames(Peptidos_PP4) <- c("N","Unused",	"%Cov(95)",	"Accessions",	"Names",	"Contrib",	"Conf",	"Sequence",	"Modifications",	"Cleavages",	"dMass",	"Prec MW",	"Prec m/z",	"Theor MW",	"Theor m/z",	"Theor z",	"Sc",	"Spectrum",	"Time")
+    # 
+    # round_df <- function(df, digits) {
+    #   nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
+    #   
+    #   df[,nums] <- round(df[,nums], digits = digits)
+    #   
+    #   (df)
+    # }
+    # 
+    # Proteins_PP5 <- round_df(Proteins_PP4, digits=2)
+    # Peptidos_PP5 <- round_df(Peptidos_PP4, digits=2)
+    # 
     
     
     ##############
