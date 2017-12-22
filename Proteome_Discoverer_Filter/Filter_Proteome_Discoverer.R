@@ -44,14 +44,13 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
                               "\t", escape_double = FALSE, trim_ws = TRUE, col_types = cols())
     Peptidos_PP <- read_delim(files_glob_peptides[i],
                               "\t", escape_double = FALSE, trim_ws = TRUE, col_types = cols())
-    
-    
-    Peptidos_PP2 <- data.frame("Master Protein Accesions"=Peptidos_PP$`Master Protein Accessions`, Sequence=Peptidos_PP$Sequence, Modifications=Peptidos_PP$Modifications, "Protein Groups"=subset(Peptidos_PP, select = c(5)), Proteins=subset(Peptidos_PP, select = c(6)),"PSMs"=subset(Peptidos_PP, select = c(7)), "Missed Clavages"=subset(Peptidos_PP, select = c(9)), "Theo.MH+[Da]"=Peptidos_PP$`Theo. MH+ [Da]` )
-    
+
     #choose the columns that we want. 
     Proteins_PP2 <- subset( Proteins_PP, select = -c(1,2))
 
     Peptidos_PP2 <- subset( Peptidos_PP, select = -c(1,2,8))
+    
+    #Add Master Protein Accesions 
     Peptidos_PP2 <- data.frame("Master Protein Accesion"=Peptidos_PP$`Master Protein Accessions`, Peptidos_PP2)
     
     #Remove rows with REVERSED as string
