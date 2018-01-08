@@ -55,24 +55,12 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     
     #Remove rows with REVERSED as string
     ###### Añadir aqui nuevo código para que te quite las Low en ambos lados. 
-    Proteins_PP3 <- Proteins_PP2[!grepl("Low", Proteins_PP2$Proteins_PP.Name),]
-    Peptidos_PP3 <- Peptidos_PP2[!grepl("REVERSED", Peptidos_PP2$Peptidos_PP.Names),]
+    #Proteins_PP3 <- Proteins_PP2[!grepl("Low", Proteins_PP2$Proteins_PP.Name),]
+    #Peptidos_PP3 <- Peptidos_PP2[!grepl("REVERSED", Peptidos_PP2$Peptidos_PP.Names),]
     
     #Proteins_PP2[- grep("^REVERSED ", Proteins_PP2$Name),]
     #Proteins_PP2[ grep("REVERSED ", Proteins_PP2$Name, invert = TRUE) , ]
     
-    # #Remove rows with Unised value => 1,3
-    # Proteins_PP4 <- subset(Proteins_PP3, Proteins_PP3$Proteins_PP.Unused > 1.3 ) 
-    # Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP...Cov.95.. > 0) 
-    # Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP..Peptides.95... > 0)
-    # 
-    # 
-    # #Filter peptide and filters
-    # Peptidos_PP4 <- subset(Peptidos_PP3, Peptidos_PP3$Peptidos_PP.Unused > 1.3)
-    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Contrib > 0) 
-    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Conf > 95) 
-    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP...Cov.95.. > 0) 
-    # 
     # #Round numbers
     # colnames(Proteins_PP4) <- c("N", "Unused", "%Cov(95)", "Peptides(95%)", "Accession","Name","Species")
     # colnames(Peptidos_PP4) <- c("N","Unused",	"%Cov(95)",	"Accessions",	"Names",	"Contrib",	"Conf",	"Sequence",	"Modifications",	"Cleavages",	"dMass",	"Prec MW",	"Prec m/z",	"Theor MW",	"Theor m/z",	"Theor z",	"Sc",	"Spectrum",	"Time")
@@ -91,15 +79,17 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     
     
     ##############
-    #comparar tablas test: 
-    
-    duplicates <- data.frame(Peptidos_PP5$Accession)
+    # #comparar tablas test: 
+    # 
+    duplicates <- data.frame("Accesion"=gsub("\\;.*","", Peptidos_PP2$Master.Protein.Accesion), stringsAsFactors = FALSE)
     duplicate2 <- aggregate(list(numdup=rep(1,nrow(duplicates))), duplicates, length)
-    duplicate3 <- with(duplicate2,  duplicate2[order(duplicate2$Peptidos_PP5.Accession) , ])
     
-    #Protein accesion sorted
-    duplicate4 <- with(Proteins_PP5,  Proteins_PP5[order(Proteins_PP5$Accession) , ])
-    #Replace in protein table
+    
+    duplicate3 <- with(duplicate2,  duplicate2[order(duplicate2$Accesion) , ])
+    # 
+    # #Protein accesion sorted
+    duplicate4 <- with(Proteins_PP2,  Proteins_PP2[order(Proteins_PP2$Accession) , ])
+    # #Replace in protein table
     
     #If we need to remove specific protein from Proteins file you can use this. 
     #duplicate4 <- duplicate4[ ! ( ( duplicate4$N ==192)) , ] 
@@ -123,8 +113,9 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     
     #We take the data that we want and remove everthing that is after the first ";".  
     df1 <- data.frame("Accesion"=gsub("\\;.*","", duplicate4$Accession), stringsAsFactors = FALSE)
-    df2 <- data.frame("Accesion2"=gsub("\\;.*","", duplicate3$Peptidos_PP5.Accession), stringsAsFactors = FALSE)
+    df2 <- data.frame("Accesion2"=gsub("\\;.*","", duplicate3$Accesion), stringsAsFactors = FALSE)
     
+
     #Create a list
     lst <- list(df1, df2)
     
@@ -144,8 +135,8 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
       duplicate4 <- duplicate4[!duplicate4$Accession == as.character(i), ]
     }
     
-    duplicate4$`Peptides(95%)` <- duplicate3$numdup
-    duplicate4$Accession <- gsub("\\;.*","", duplicate4$Accession)
+    # duplicate4$`Peptides(95%)` <- duplicate3$numdup
+    # duplicate4$Accession <- gsub("\\;.*","", duplicate4$Accession)
     
     
     #Sort columns by peptides
