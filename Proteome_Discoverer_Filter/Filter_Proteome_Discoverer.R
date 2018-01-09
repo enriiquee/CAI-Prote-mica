@@ -51,55 +51,20 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     Peptidos_PP2 <- subset( Peptidos_PP, select = -c(1,2,8))
     
     #Add Master Protein Accesions 
-    Peptidos_PP2 <- data.frame("Master Protein Accesion"=Peptidos_PP$`Master Protein Accessions`, Peptidos_PP2)
-    
-    #Remove rows with REVERSED as string
-    ###### Añadir aqui nuevo código para que te quite las Low en ambos lados. 
-    Proteins_PP3 <- Proteins_PP2[!grepl("Low", Proteins_PP2$Proteins_PP.Name),]
-    Peptidos_PP3 <- Peptidos_PP2[!grepl("REVERSED", Peptidos_PP2$Peptidos_PP.Names),]
-    
-    #Proteins_PP2[- grep("^REVERSED ", Proteins_PP2$Name),]
-    #Proteins_PP2[ grep("REVERSED ", Proteins_PP2$Name, invert = TRUE) , ]
-    
-    # #Remove rows with Unised value => 1,3
-    # Proteins_PP4 <- subset(Proteins_PP3, Proteins_PP3$Proteins_PP.Unused > 1.3 ) 
-    # Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP...Cov.95.. > 0) 
-    # Proteins_PP4 <- subset(Proteins_PP4, Proteins_PP4$Proteins_PP..Peptides.95... > 0)
-    # 
-    # 
-    # #Filter peptide and filters
-    # Peptidos_PP4 <- subset(Peptidos_PP3, Peptidos_PP3$Peptidos_PP.Unused > 1.3)
-    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Contrib > 0) 
-    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP.Conf > 95) 
-    # Peptidos_PP4 <- subset(Peptidos_PP4, Peptidos_PP4$Peptidos_PP...Cov.95.. > 0) 
-    # 
-    # #Round numbers
-    # colnames(Proteins_PP4) <- c("N", "Unused", "%Cov(95)", "Peptides(95%)", "Accession","Name","Species")
-    # colnames(Peptidos_PP4) <- c("N","Unused",	"%Cov(95)",	"Accessions",	"Names",	"Contrib",	"Conf",	"Sequence",	"Modifications",	"Cleavages",	"dMass",	"Prec MW",	"Prec m/z",	"Theor MW",	"Theor m/z",	"Theor z",	"Sc",	"Spectrum",	"Time")
-    # 
-    # round_df <- function(df, digits) {
-    #   nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
-    #   
-    #   df[,nums] <- round(df[,nums], digits = digits)
-    #   
-    #   (df)
-    # }
-    # 
-    # Proteins_PP5 <- round_df(Proteins_PP4, digits=2)
-    # Peptidos_PP5 <- round_df(Peptidos_PP4, digits=2)
-    # 
-    
+    Peptidos_PP2 <- data.frame("Accesion"=gsub("\\;.*","", Peptidos_PP$`Master Protein Accessions`), Peptidos_PP2, stringsAsFactors = FALSE)
     
     ##############
-    #comparar tablas test: 
+    # #comparar tablas test: 
+    # 
+    duplicate <- data.frame("Accesion"=gsub("\\;.*","", Peptidos_PP2$Accesion), stringsAsFactors = FALSE)
+    duplicate2 <- aggregate(list(numdup=rep(1,nrow(duplicate))), duplicate, length)
     
-    duplicates <- data.frame(Peptidos_PP5$Accession)
-    duplicate2 <- aggregate(list(numdup=rep(1,nrow(duplicates))), duplicates, length)
-    duplicate3 <- with(duplicate2,  duplicate2[order(duplicate2$Peptidos_PP5.Accession) , ])
-    
-    #Protein accesion sorted
-    duplicate4 <- with(Proteins_PP5,  Proteins_PP5[order(Proteins_PP5$Accession) , ])
-    #Replace in protein table
+
+    duplicate3 <- with(duplicate2,  duplicate2[order(duplicate2$Accesion) , ])
+    # 
+    # #Protein accesion sorted
+    duplicate4 <- with(Proteins_PP2,  Proteins_PP2[order(Proteins_PP2$Accession) , ])
+    # #Replace in protein table
     
     #If we need to remove specific protein from Proteins file you can use this. 
     #duplicate4 <- duplicate4[ ! ( ( duplicate4$N ==192)) , ] 
@@ -123,8 +88,9 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     
     #We take the data that we want and remove everthing that is after the first ";".  
     df1 <- data.frame("Accesion"=gsub("\\;.*","", duplicate4$Accession), stringsAsFactors = FALSE)
-    df2 <- data.frame("Accesion2"=gsub("\\;.*","", duplicate3$Peptidos_PP5.Accession), stringsAsFactors = FALSE)
+    df2 <- data.frame("Accesion2"=gsub("\\;.*","", duplicate3$Accesion), stringsAsFactors = FALSE)
     
+
     #Create a list
     lst <- list(df1, df2)
     
@@ -144,37 +110,35 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
       duplicate4 <- duplicate4[!duplicate4$Accession == as.character(i), ]
     }
     
-    duplicate4$`Peptides(95%)` <- duplicate3$numdup
-    duplicate4$Accession <- gsub("\\;.*","", duplicate4$Accession)
     
+    # duplicate4$`Peptides(95%)` <- duplicate3$numdup
+    # duplicate4$Accession <- gsub("\\;.*","", duplicate4$Accession)
     
-    #Sort columns by peptides
-    Proteins_PP6 <- duplicate4[ order(-duplicate4[,4], -duplicate4[,2]), ]
-    Proteins_PP6$N <- 1:nrow(Proteins_PP6)
+    Proteins_PP3 <- duplicate4
     
-    Proteins_PP6$Species <- gsub('\\d+\\.?','', Proteins_PP6$Species)
+    Proteins_PP3 <- Proteins_PP3[ order(-Proteins_PP3[,14]), ]
+    Numeric_table <- data.frame(N=1:nrow(Proteins_PP3))
+    
+    Proteins_PP3 <- data.frame("N"=Numeric_table$N, Proteins_PP3)
+    
+    #Proteins_PP6$Species <- gsub('\\d+\\.?','', Proteins_PP6$Species)
 
-    #Compare and create a new column with element assigned by comparation with N peptide table. 
+  #Ordenamos los peptidos y proteínas por accesion
+    Proteins_PP4 <- with(Proteins_PP3,  Proteins_PP3[order(Proteins_PP3$Accession) , ])
+    Peptidos_PP4 <- with(Peptidos_PP2,  Peptidos_PP2[order(Peptidos_PP2$Accesion) , ])
     
-    Peptidos_PP6 <- Peptidos_PP5[order(Peptidos_PP5[,1],-Peptidos_PP5[,6]),]
-    Peptidos_PP6$Accessions <- gsub("\\;.*","", Peptidos_PP6$Accessions)
+  #Ahora que están ordenador por nombre los comparamos y creamos una nueva columna. 
     
-    for (i in 1:length(Peptidos_PP6$Accessions)) {
-      #print(match(prueba1_2$Peptidos_PP6.Accessions[i], prueba1$Proteins_PP6.Accession, nomatch=NA))
-      Peptidos_PP6$N[i] <- match(Peptidos_PP6$Accessions[i],Proteins_PP6$Accession, nomatch=NA)
-      
-    } 
+    for (i in 1:length(Proteins_PP4$Accession)){
+      print(i)
+      for (z in 1:length(Peptidos_PP4$Accesion)){
+        print(z)
+        if (Peptidos_PP4$Accesion[z] == Proteins_PP4$Accession[i]){
+          Peptidos_PP4$N[z] <- Proteins_PP4$N[i]
+        }
+    }}
+  
     
-    Peptidos_PP6 <- Peptidos_PP6[order(Peptidos_PP6[,1],-Peptidos_PP6[,6]),]
-    
-    #Export xml
-    # WriteXLS(Proteins_PP6, ExcelFileName = "Proteins_summary.xls", SheetNames = NULL, perl = "perl",
-    #          verbose = FALSE, Encoding = c("UTF-8", "latin1", "cp1252"),
-    #          row.names = FALSE, col.names = TRUE,
-    #          AdjWidth = FALSE, AutoFilter = FALSE, BoldHeaderRow = FALSE,
-    #          na = "",
-    #          FreezeRow = 0, FreezeCol = 0,
-    #          envir = parent.frame())
     
     
     #Check if there is any different between N and Proteins
