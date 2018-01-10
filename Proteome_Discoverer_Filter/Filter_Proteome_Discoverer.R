@@ -61,15 +61,51 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
     Peptidos_PP2 <- subset( Peptidos_PP, select = -c(1,2,8))
     
     #Add Master Protein Accesions 
+<<<<<<< HEAD
     Peptidos_PP2 <- data.frame("Accesion"=gsub("\\;.*","", Peptidos_PP$`Master Protein Accessions`), Peptidos_PP2, stringsAsFactors = FALSE)
+=======
+    Peptidos_PP2 <- data.frame("Master Protein Accesion"=Peptidos_PP$`Master Protein Accessions`, Peptidos_PP2)
+    
+    #Remove rows with REVERSED as string
+    ###### Añadir aqui nuevo código para que te quite las Low en ambos lados. 
+    #Proteins_PP3 <- Proteins_PP2[!grepl("Low", Proteins_PP2$Proteins_PP.Name),]
+    #Peptidos_PP3 <- Peptidos_PP2[!grepl("REVERSED", Peptidos_PP2$Peptidos_PP.Names),]
+    
+    #Proteins_PP2[- grep("^REVERSED ", Proteins_PP2$Name),]
+    #Proteins_PP2[ grep("REVERSED ", Proteins_PP2$Name, invert = TRUE) , ]
+    
+    # #Round numbers
+    # colnames(Proteins_PP4) <- c("N", "Unused", "%Cov(95)", "Peptides(95%)", "Accession","Name","Species")
+    # colnames(Peptidos_PP4) <- c("N","Unused",	"%Cov(95)",	"Accessions",	"Names",	"Contrib",	"Conf",	"Sequence",	"Modifications",	"Cleavages",	"dMass",	"Prec MW",	"Prec m/z",	"Theor MW",	"Theor m/z",	"Theor z",	"Sc",	"Spectrum",	"Time")
+    # 
+    # round_df <- function(df, digits) {
+    #   nums <- vapply(df, is.numeric, FUN.VALUE = logical(1))
+    #   
+    #   df[,nums] <- round(df[,nums], digits = digits)
+    #   
+    #   (df)
+    # }
+    # 
+    # Proteins_PP5 <- round_df(Proteins_PP4, digits=2)
+    # Peptidos_PP5 <- round_df(Peptidos_PP4, digits=2)
+    # 
+    
+>>>>>>> 3fc83ae9126342a8f055a27338309d9f7efa3b0d
     
     ##############
     # #comparar tablas test: 
     # 
+<<<<<<< HEAD
     duplicate <- data.frame("Accesion"=gsub("\\;.*","", Peptidos_PP2$Accesion), stringsAsFactors = FALSE)
     duplicate2 <- aggregate(list(numdup=rep(1,nrow(duplicate))), duplicate, length)
     
 
+=======
+    duplicates <- data.frame("Accesion"=gsub("\\;.*","", Peptidos_PP2$Master.Protein.Accesion), stringsAsFactors = FALSE)
+    duplicate2 <- aggregate(list(numdup=rep(1,nrow(duplicates))), duplicates, length)
+    
+    
+>>>>>>> 3fc83ae9126342a8f055a27338309d9f7efa3b0d
     duplicate3 <- with(duplicate2,  duplicate2[order(duplicate2$Accesion) , ])
     # 
     # #Protein accesion sorted
@@ -120,6 +156,11 @@ if (length(files_glob_peptides) != length(files_glob_proteins)) {
       duplicate4 <- duplicate4[!duplicate4$Accession == as.character(i), ]
     }
     
+<<<<<<< HEAD
+=======
+    # duplicate4$`Peptides(95%)` <- duplicate3$numdup
+    # duplicate4$Accession <- gsub("\\;.*","", duplicate4$Accession)
+>>>>>>> 3fc83ae9126342a8f055a27338309d9f7efa3b0d
     
     # duplicate4$`Peptides(95%)` <- duplicate3$numdup
     # duplicate4$Accession <- gsub("\\;.*","", duplicate4$Accession)
